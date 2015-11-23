@@ -1,114 +1,39 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
-using System.Web.Mvc;
-using Microsoft.SqlServer.Server;
 
 namespace MvcBreadCrumbs
 {
-
-    public class State
+    class State : IEnumerable<KeyValuePair<int, StateEntry>>
     {
-        
-        public string SessionCookie { get; set; }
-        public List<StateEntry> Crumbs { get; set; }
-        public StateEntry Current { get; set; }
-       
+        SortedList<int, StateEntry> Crumbs { get; } = new SortedList<int, StateEntry>();
 
-        public void Push(ActionExecutingContext context, string label)
+        public void Add(string url, string label, int level = 0, bool onlyInsert = false)
         {
-
-            var key =
-                context.HttpContext.Request.Url.ToString()
-                .ToLower()
-                .GetHashCode();
-
-            if (Crumbs.Any(x => x.Key == key))
+            StateEntry newStateEntry = new StateEntry(url, label);
+            if (Crumbs.Any(z => z.Value.Equals(newStateEntry)))
             {
-                var newCrumbs = new List<StateEntry>();
-                var remove = false;
-                // We've seen this route before, maybe user clicked on a breadcrumb
-                foreach (var crumb in Crumbs)
-                {
-                    if (crumb.Key == key)
-                    {
-                        remove = true;
-                    }
-                    if (!remove)
-                    {
-                        newCrumbs.Add(crumb);
-                    }
-                }
-                Crumbs = newCrumbs;
+                if (onlyInsert) return;
+                foreach (var item in Crumbs.SkipWhile(z => !z.Value.Equals(newStateEntry)).ToList())
+                { Crumbs.Remove(item.Key); }
             }
-
-            Current = new StateEntry().WithKey(key)
-                .SetContext(context)
-                .WithUrl(context.HttpContext.Request.Url.ToString())
-                .WithLabel(label);
-                
-            Crumbs.Add(Current);
-
-        }
-        
-        public State(string cookie)
-        {
-            SessionCookie = cookie;
-            Crumbs = new List<StateEntry>();
-        }
-
-    }
-
-    public class StateEntry
-    {
-        public ActionExecutingContext Context { get; private set; }
-        public string Label { get; set; }
-        public int Key { get; set; }
-        public string Url { get; set; }
-
-        public StateEntry WithKey(int key)
-        {
-            Key = key;
-            return this;
-        }
-
-        public StateEntry WithUrl(string url)
-        {
-            Url = url;
-            return this;
-        }
-
-        public StateEntry WithLabel(string label)
-        {
-            Label = label ?? Label;
-            return this;
-        }
-
-
-        public StateEntry SetContext(ActionExecutingContext context)
-        {
-            Context = context;
-            Label = Label ?? (string) context.RouteData.Values["action"];
-            return this;
-        }
-
-        public string Controller 
-        { 
-            get
+            level = (level != 0) ? level : (Crumbs.Count > 0) ? Crumbs.Last().Key + 1 : 1;
+            if (Crumbs.ContainsKey(level))
             {
-                return (string) Context.RouteData.Values["controller"];
-            } 
-        }
-
-        public string Action
-        {
-            get
-            {
-                return (string)Context.RouteData.Values["action"];
+                foreach (var item in Crumbs.SkipWhile(z => z.Key < level).ToList())
+                { Crumbs.Remove(item.Key); }
             }
+            Crumbs.Add(level, newStateEntry);
         }
 
+        public IEnumerator<KeyValuePair<int, StateEntry>> GetEnumerator()
+        {
+            return Crumbs.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
     }
 }

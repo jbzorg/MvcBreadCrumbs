@@ -1,38 +1,20 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Concurrent;
 
 namespace MvcBreadCrumbs
 {
-    public class StateManager
+    static class StateManager
     {
-        public static readonly List<State> States = new List<State>();
+        static readonly ConcurrentDictionary<string, State> States = new ConcurrentDictionary<string, State>();
 
         public static State GetState(string id)
         {
-            if (States.FirstOrDefault(x => x.SessionCookie == id) == null)
-            {
-                StateManager.CreateState(id);
-            }
-            return States.First(x => x.SessionCookie == id);
-        }
-
-        public static State CreateState(string cookie)
-        {
-            var newstate = new State(cookie);
-            States.Add(newstate);
-
-            return newstate;
-
+            return States.GetOrAdd(id, new State());
         }
 
         public static void RemoveState(string id)
         {
-            var state = GetState(id);
-            if (state != null)
-            {
-                States.Remove(state);
-            }
+            State state = null;
+            States.TryRemove(id, out state);
         }
-
     }
 }
