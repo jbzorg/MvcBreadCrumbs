@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System.Threading.Tasks;
 
 namespace MvcBreadCrumbs.Tests
 {
@@ -6,12 +7,19 @@ namespace MvcBreadCrumbs.Tests
     public class StateManagerTest
     {
         [Test]
-        public void GetRemoveTest()
+        public async Task GetRemoveTest()
         {
-            State state = StateManager.GetState("01");
+            State state = null;
+
+            state = StateManager.GetState("01");
             Assert.AreSame(state, StateManager.GetState("01"));
             StateManager.RemoveState("01");
             Assert.AreNotSame(state, StateManager.GetState("01"));
+
+            state = StateManager.GetState("02");
+            Assert.AreSame(state, StateManager.GetState("02", 10));
+            await Task.Delay(11);
+            Assert.AreNotSame(state, StateManager.GetState("02"));
         }
     }
 }

@@ -10,24 +10,27 @@ namespace MvcBreadCrumbs
     struct StateEntry : IStateEntry
     {
         int hash;
-
         public string Label { get; }
         public string Url { get; }
+        public int Level { get; }
+        public bool Head { get; }
+        public int UrlHash { get; }
 
-        public StateEntry(string url, string label)
+        public StateEntry(string url, string label, int level = -1, bool head = false)
         {
             if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
             if (string.IsNullOrEmpty(label)) throw new ArgumentNullException(nameof(label));
 
             Label = label;
             Url = url;
-            hash = Url.ToLowerInvariant().GetHashCode();
+            Level = level;
+            Head = head;
+            UrlHash = Url.ToLowerInvariant().GetHashCode();
+
+            hash = Label.GetHashCode() ^ Url.GetHashCode() ^ Level.GetHashCode() ^ Head.GetHashCode();
         }
 
-        public override int GetHashCode()
-        {
-            return hash;
-        }
+        public override int GetHashCode() => hash;
 
         public override bool Equals(object obj)
         {
@@ -40,12 +43,13 @@ namespace MvcBreadCrumbs
         public bool Equals(StateEntry obj)
         {
             if (GetHashCode() != obj.GetHashCode()) return false;
-            return Url.Equals(obj.Url, StringComparison.InvariantCultureIgnoreCase);
+            return Label.Equals(obj.Label) &&
+                Url.Equals(obj.Url) &&
+                Level == obj.Level &&
+                Head == obj.Head;
         }
 
-        public StateEntry ToStateEntry()
-        {
-            return this;
-        }
+        public StateEntry ToStateEntry() => this;
+
     }
 }

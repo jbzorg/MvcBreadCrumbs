@@ -87,9 +87,7 @@
   <ItemGroup>
     <Compile Include="StateEntryTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StateTest.cs" />
     <Compile Include="StateManagerTest.cs" />
-    <Compile Include="BreadCrumbTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MvcBreadCrumbs\MvcBreadCrumbs.csproj">

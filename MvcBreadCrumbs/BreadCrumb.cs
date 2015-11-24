@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -6,38 +7,28 @@ namespace MvcBreadCrumbs
 {
     public static class BreadCrumb
     {
-        static IProvideBreadCrumbsSession defaultSessionProvider = new HttpSessionProvider();
-
-        public static void Add(string url, string label, int level = 0, bool onlyInsert = false, IProvideBreadCrumbsSession sessionProvider = null)
+        public static string Add(string url, string label, int level = -1, bool head = false, string id = null, int timeOut = 60000)
         {
-            var state = StateManager.GetState((sessionProvider ?? defaultSessionProvider).SessionId);
-            if (state == null) throw new Exception("Could not find SessionId");
+            if (string.IsNullOrEmpty(id)) id = Guid.NewGuid().ToString("N");
+            State state = StateManager.GetState(id, timeOut);
+            if (state == null) throw new Exception("Could not get State");
 
-            state.Add(url, label, level, onlyInsert);
+            state.Add(url, label, level, head);
+            return id;
         }
 
-        public static string Display(string addClasses = null, IProvideBreadCrumbsSession sessionProvider = null)
+        public static IEnumerable<object> Get(string id, int timeOut = 60000)
         {
-            var state = StateManager.GetState((sessionProvider ?? defaultSessionProvider).SessionId);
-            if (state == null) throw new Exception("Could not find SessionId");
+            if (string.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id));
 
-            if (state.Count() == 0) return "<!-- BreadCrumbs stack is empty -->";
-
-            StringBuilder sb = new StringBuilder($"<ul class=\"breadcrumb {addClasses}\">");
-            foreach (var item in state)
-            { sb.Append($"<li><a href=\"{item.Value.Url}\">{item.Value.Label}</a></li>"); }
-            sb.Append("</ul>");
-            return sb.ToString();
-        }
-
-        public static string DisplayRaw(IProvideBreadCrumbsSession sessionProvider = null)
-        {
-            var state = StateManager.GetState((sessionProvider ?? defaultSessionProvider).SessionId);
-            if (state == null) throw new Exception("Could not find SessionId");
-
-            if (state.Count() == 0) return "<!-- BreadCrumbs stack is empty -->";
-
-            return string.Join(" > ", state.Select(x => $"<a href=\"{x.Value.Url}\">{x.Value.Label}</a>"));
+            return StateManager.GetState(id, timeOut).Select(z => new
+            {
+                level = z.Level,
+                label = z.Label,
+                url = z.Url,
+                hash = z.UrlHash,
+                head = z.Head
+            });
         }
     }
 }
