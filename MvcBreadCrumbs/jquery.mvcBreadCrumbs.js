@@ -80,7 +80,8 @@
     function Draw($that, data) {
         $that.find('li').remove();
         data.forEach(function (element, index, array) {
-            $that.append('<li><a href="' + element.url + '">' + element.label + '</a></li>');
+            if (element.link === true) $that.append('<li><a href="' + element.url + '">' + element.label + '</a></li>');
+            else $that.append('<li>' + element.label + '</li>');
         })
     }
 })(jQuery);

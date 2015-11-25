@@ -7,13 +7,13 @@ namespace MvcBreadCrumbs
 {
     public static class BreadCrumb
     {
-        public static string Add(string url, string label, int level = -1, bool head = false, string id = null, int timeOut = 60000)
+        public static string Add(string url, string label, int level = -1, bool head = false, bool link = true,  string id = null, int timeOut = 60000)
         {
             if (string.IsNullOrEmpty(id)) id = Guid.NewGuid().ToString("N");
             State state = StateManager.GetState(id, timeOut);
             if (state == null) throw new Exception("Could not get State");
 
-            state.Add(url, label, level, head);
+            state.Add(url, label, level, head, link);
             return id;
         }
 
@@ -27,7 +27,8 @@ namespace MvcBreadCrumbs
                 label = z.Label,
                 url = z.Url,
                 hash = z.UrlHash,
-                head = z.Head
+                head = z.Head,
+                link = z.Link
             });
         }
     }

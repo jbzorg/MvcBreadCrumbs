@@ -14,7 +14,7 @@ namespace MvcBreadCrumbs
         public Task Task { get; set; } = null;
         public CancellationTokenSource CancellationTokenSource { get; set; } = null;
 
-        public void Add(string url, string label, int level = -1, bool head = false) => crumbs.Add(new StateEntry(url, label, level, head));
+        public void Add(string url, string label, int level = -1, bool head = false, bool link = true) => crumbs.Add(new StateEntry(url, label, level, head, link));
 
         public IEnumerator<StateEntry> GetEnumerator() => crumbs.GetEnumerator();
 

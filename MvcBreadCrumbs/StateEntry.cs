@@ -15,8 +15,9 @@ namespace MvcBreadCrumbs
         public int Level { get; }
         public bool Head { get; }
         public int UrlHash { get; }
+        public bool Link { get; }
 
-        public StateEntry(string url, string label, int level = -1, bool head = false)
+        public StateEntry(string url, string label, int level = -1, bool head = false, bool link = true)
         {
             if (string.IsNullOrEmpty(url)) throw new ArgumentNullException(nameof(url));
             if (string.IsNullOrEmpty(label)) throw new ArgumentNullException(nameof(label));
@@ -25,9 +26,10 @@ namespace MvcBreadCrumbs
             Url = url;
             Level = level;
             Head = head;
+            Link = link;
             UrlHash = Url.ToLowerInvariant().GetHashCode();
 
-            hash = Label.GetHashCode() ^ Url.GetHashCode() ^ Level.GetHashCode() ^ Head.GetHashCode();
+            hash = Label.GetHashCode() ^ Url.GetHashCode() ^ Level.GetHashCode() ^ Head.GetHashCode() ^ Link.GetHashCode();
         }
 
         public override int GetHashCode() => hash;
