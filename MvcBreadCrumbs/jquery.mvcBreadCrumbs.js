@@ -9,7 +9,7 @@
         var defaults = {
             url: '', // url for get current crumb
             id: '', // id current crumb
-            classes: '', // classes for ul element
+            classes: '', // classes for ol element
             storeKey: 'breadcrumb', // key for sessionStore
             onError: undefined // callback for fire error event
         };
@@ -17,7 +17,7 @@
         options = $.extend({}, defaults, options);
 
         //init
-        $that = $that.append('<ul class="breadcrumb ' + options.classes + '">').find('ul');
+        $that = $that.append('<ol class="breadcrumb ' + options.classes + '">').find('ol');
 
         //get only from sessionstorage
         CrumbsProcess($that, options, null);

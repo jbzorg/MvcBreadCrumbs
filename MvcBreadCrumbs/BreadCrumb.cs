@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace MvcBreadCrumbs
 {
@@ -10,6 +9,11 @@ namespace MvcBreadCrumbs
     /// </summary>
     public static class BreadCrumb
     {
+        /// <summary>
+        /// Callback preprocessor for modify url
+        /// </summary>
+        public static Func<string, string> UrlPreprocessor { get; set; }
+
         /// <summary>
         /// Add crumb to queue
         /// </summary>
@@ -27,7 +31,7 @@ namespace MvcBreadCrumbs
             State state = StateManager.GetState(id, timeOut);
             if (state == null) throw new Exception("Could not get State");
 
-            state.Add(url, label, level, head, link);
+            state.Add(UrlPreprocessor?.Invoke(url) ?? url, label, level, head, link);
             return id;
         }
 
